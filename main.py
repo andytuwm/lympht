@@ -1,14 +1,15 @@
 import math
-import time
 
 import cv2
 import numpy as np
 
+from src.utils import image_utils
 
-class Target:
+class Lympht:
     def __init__(self):
         self.capture = cv2.VideoCapture(0)
-        cv2.namedWindow("Target", 1)
+        self.main_window_name = "lympht"
+        cv2.namedWindow(self.main_window_name, 1)
         # cv2.namedWindow("Threshold1", 1)
         # cv2.namedWindow("Threshold2", 1)
         # cv2.namedWindow("hsv", 1)
@@ -27,10 +28,9 @@ class Target:
         # threshold_img1a = np.zeros((frame_height, frame_width, 1), dtype=np.uint8)
         threshold_img2 = np.zeros((frame_height, frame_width, 1), dtype=np.uint8)
         # threshold_img2a = np.zeros((frame_height, frame_width, 1), dtype=np.uint8)
-        i = 0
 
-        fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
-        writer = cv2.VideoWriter("angle_tracking.avi", fourcc, 30, (frame_height, frame_width), 1)
+        # fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+        # writer = cv2.VideoWriter("angle_tracking.avi", fourcc, 30, (frame_height, frame_width), 1)
 
         while True:
             # capture the image from the cam
@@ -55,7 +55,6 @@ class Target:
             hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
             # define range of color in HSV
-
 
             # threshold the image to isolate two colors
             mask_blue = cv2.inRange(hsv_img, BLUE_MIN, BLUE_MAX, threshold_img1)
@@ -144,10 +143,9 @@ class Target:
             if c == 27 or c == 10:
                 break
 
-    # time.sleep(5)
     cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    t = Target()
+    t = Lympht()
     t.run()
