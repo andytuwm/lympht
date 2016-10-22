@@ -5,6 +5,7 @@ import numpy as np
 
 from src.utils import image_utils
 
+
 class Lympht:
     def __init__(self):
         self.capture = cv2.VideoCapture(0)
@@ -123,21 +124,21 @@ class Lympht:
             y1 = float(y1)
             x2 = float(x2)
             y2 = float(y2)
-            if (x2 - x1 != 0):
+
+            try:
                 angle = int(math.atan((y1 - y2) / (x2 - x1)) * 180 / math.pi)
-            else:
-                print "zero detected"
-                angle = None
-            if (angle != None):
                 cv2.putText(img, str(angle), (int(x1) + 50, (int(y2) + int(y1)) / 2), font, 8, (255, 255, 255), 8)
+            except ZeroDivisionError as e:
+                print "Error:", e
 
             # cv2.writeFrame(writer,img)
 
             # display frames to users
-            cv2.imshow(self.main_window_name, image_utils.mirror_image(img))
+            cv2.imshow(self.main_window_name, img)
             # cv2.imshow("Threshold1",threshold_img1)
             # cv2.imshow("Threshold2",threshold_img2) #Yellow
             # cv2.imshow("hsv",hsv_img)
+
             # Listen for ESC or ENTER key
             c = cv2.waitKey(7) % 0x100
             if c == 27 or c == 10:
