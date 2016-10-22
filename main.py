@@ -92,10 +92,7 @@ class Lympht:
             # print contourArea2
 
             # initialize x and y
-            x1, y1, x2, y2 = (1, 2, 3, 4)
-            coord_list = [x1, y1, x2, y2]
-            for x in coord_list:
-                x = 0
+            x1, y1, x2, y2 = 0, 0, 0, 0
 
             # there can be noise in the video so ignore objects with small areas
             if (area1 > 99999):  # 99999
