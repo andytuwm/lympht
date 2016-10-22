@@ -36,6 +36,7 @@ class Lympht:
         while True:
             # capture the image from the cam
             ret, img = self.capture.read()
+            img = image_utils.mirror_image(img)
 
             # get contour
             # reti, thresh = cv2.threshold(img,127,255,0)
