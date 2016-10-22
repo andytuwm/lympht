@@ -134,7 +134,7 @@ class Lympht:
             # cv2.writeFrame(writer,img)
 
             # display frames to users
-            cv2.imshow("Target", img)
+            cv2.imshow(self.main_window_name, image_utils.mirror_image(img))
             # cv2.imshow("Threshold1",threshold_img1)
             # cv2.imshow("Threshold2",threshold_img2) #Yellow
             # cv2.imshow("hsv",hsv_img)
