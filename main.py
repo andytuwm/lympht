@@ -6,6 +6,11 @@ from src import backgnd_sub
 
 
 class Lympht:
+
+    isBackgroundSet = False
+    background = None
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
     def __init__(self):
         self.capture = cv2.VideoCapture(0)
         self.main_window_name = "lympht"
@@ -51,8 +56,7 @@ class Lympht:
 
             cv2.imshow(self.main_window_name, frame)
 
-    cv2.destroyAllWindows()
-
+        cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     lympht = Lympht()
