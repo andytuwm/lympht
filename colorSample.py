@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 from src.utils import image_utils
 
-
 class Lympht:
 
     background = None
@@ -38,29 +37,45 @@ class Lympht:
             for i in range(sample_columns):
                 for j in range(sample_rows):
                     x_location = frame_width/sample_columns*(i+1) - frame_width/sample_columns/2
-                    y_location = (frame_height/2) - 50 + 50*j
+                    y_location = (frame_height/3) + (frame_height/4)*j
                     color_sample_locations.append([x_location,y_location])
                     #Draw rectangles for sampling locations
-                    cv2.rectangle(frame,(x_location, y_location)
-                        ,(x_location+10, y_location+10), (0, 255, 0), 3)
 
+                    #TODO: PUT THIS CODE LATER SO WE DONT SAMPLE THIS
+                    #cv2.rectangle(frame,(x_location, y_location)
+                    #    ,(x_location+10, y_location+10), (0, 255, 0), 3)
+
+                    print(str(x_location) + " " + str(y_location))
+
+            #print(color_sample_locations)
             color_samples = []
+            #print(color_sample_locations)
+            #print(frame_width, frame_height)
 
-            print(len(color_sample_locations))
-            print(color_sample_locations)
+            for i in range(len(color_sample_locations)):
+                x = color_sample_locations[i][0]
+                y = color_sample_locations[i][1]
+                #print(x)
+                #print(x, y)
+                #print(y,x)
+                #x=200
+                #print(type(x))
+                #y=1000
+                roi = frame[y:y+10, x:x+10] #roi means region of interest
 
-            for i in range(9):
-                x = color_sample_locations[i][1]
-                y = color_sample_locations[i][0]
-                x_offset = x + 10
-                y_offset = y + 10
+                #print(roi)
 
-                average = frame[x:x_offset,y:y_offset]
-                average = np.average(average, axis=1)
-                average = np.average(average, axis=0)
+                if roi.shape[0] == 0:
+                    print(roi)
+                    #print(y,x)
+                    #print(frame_width,frame_height)
+                average_rows = np.average(roi,axis=0)
+                average = np.average(average_rows,axis=0)
                 color_samples.append(average)
+                print(average)
 
-            print(color_samples)
+
+            #print(color_samples)
 
             # filters everything within average ranges and adds it to sumFrames
             for i in range(len(color_samples)):
