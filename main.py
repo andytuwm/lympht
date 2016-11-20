@@ -18,6 +18,7 @@ class Lympht:
         while True:
             _, frame = self.capture.read()
             frame = image_utils.mirror_image(frame)
+            frame_height, frame_width, frame_channels = frame.shape
 
             # Listen for ESC or ENTER key
             c = cv2.waitKey(7) % 0x100
@@ -47,6 +48,14 @@ class Lympht:
                     hull.ravel()
                     hull.shape = count, 2
                     cv2.polylines(frame, np.int32([hull]), True, (0, 255, 0), 3)
+
+                    area = cv2.contourArea(largest_contour)
+                    cv2.putText(frame, "largest contour area " + str(area) + "px",
+                        (0, frame_height/6), self.font, 0.5, (50, 50, 255), 2)
+
+                    hull_area = cv2.contourArea(hull)
+                    cv2.putText(frame, "hull area " + str(hull_area) + "px",
+                        (0, frame_height/7), self.font, 0.5, (50, 50, 255), 2)
 
                 cv2.drawContours(frame, contours, largest_contour_index, (255, 255, 0), 3)
                 cv2.imshow('thresh', thresh)
