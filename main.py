@@ -3,9 +3,9 @@ from __future__ import print_function
 import cv2
 import numpy as np
 
-from src import backgnd_sub
+from src import backgnd_sub, colorSampleLocation
 from src.utils import image_utils
-from src import colorSampler
+from src import colorSampler as cs
 
 
 class Lympht:
@@ -14,19 +14,16 @@ class Lympht:
         self.main_window_name = "lympht"
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.bg_sub = backgnd_sub.BackgroundSubtractor()
-        self.cs = colorSampler.ColorSampler()
-        self.color_locations_set = False
+        self.cs = None
+        self.csl = colorSampleLocation.ColorSampleLocation(self.capture.read()[1])
+        self.cs_locations = self.csl.get_color_sample_locations()
 
     def run(self):
         while True:
             _, frame = self.capture.read()
             frame = image_utils.mirror_image(frame)
             frame_height, frame_width, frame_channels = frame.shape
-
-            if self.color_locations_set is False:
-                self.color_locations_set = True
-                self.cs.setColorSampleLocations(frame)
-
+            frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
             # Listen for ESC or ENTER key
             c = cv2.waitKey(7) % 0x100
@@ -36,7 +33,8 @@ class Lympht:
             elif c == ord('b'):
                 self.bg_sub.set_frame_as_background(frame)
             elif c == ord('c'):
-                self.cs.setColorFrame(frame)
+                self.cs = cs.ColorSampler(frame_hsv, self.cs_locations)
+                self.cs.addColorRangesFromFrame()
 
             # If background is set, we can differentiate
             # foreground and background
@@ -70,16 +68,15 @@ class Lympht:
                 cv2.drawContours(frame, contours, largest_contour_index, (255, 255, 0), 3)
                 cv2.imshow('thresh', thresh)
 
-            #If skin color is sampled, we can isolate the sampled colors in the image
-            if self.cs.color_frame_set is True:
-
-                print(self.cs.color_sample_averages)
-                color_thresh = self.cs.get_color_mask(frame)
-                #self.cs.draw_sample_locations(frame)
+            # If skin color is sampled, we can isolate the sampled colors in the image
+            if self.cs is not None:
+                # print(self.cs.color_sample_averages)
+                color_thresh = self.cs.get_color_mask(frame_hsv)
+                # self.cs.draw_sample_locations(frame)
                 cv2.imshow('color_thresh', color_thresh)
 
             draw_frame = frame
-            self.cs.draw_sample_locations(draw_frame)
+            self.csl.draw_sample_locations(draw_frame)
             cv2.imshow(self.main_window_name, draw_frame)
 
         cv2.destroyAllWindows()
