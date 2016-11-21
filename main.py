@@ -22,6 +22,8 @@ class Lympht:
         while True:
             _, frame = self.capture.read()
             frame = image_utils.mirror_image(frame)
+            draw_frame = frame.copy()
+            bg = frame.copy()
             frame_height, frame_width, frame_channels = frame.shape
             frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -31,49 +33,30 @@ class Lympht:
                 break
             # On 'b' keypress, we save the background
             elif c == ord('b'):
-                self.bg_sub.set_frame_as_background(frame)
+                self.bg_sub.set_frame_as_background(bg)
             elif c == ord('c'):
                 self.cs = cs.ColorSampler(frame_hsv, self.cs_locations)
+                self.cs.addColorRangesFromFrame()
+            elif c == ord('a'):
                 self.cs.addColorRangesFromFrame()
 
             # If background is set, we can differentiate
             # foreground and background
             if self.bg_sub.background_set is True:
-                thresh, contours = self.bg_sub.get_diff(frame)
-
+                bg_thresh, contours = self.bg_sub.get_diff(bg)
                 contour_count = len(contours)
-
-                # find largest contour
-                try:
-                    largest_contour_index, largest_contour = max(enumerate(contours), key=lambda x: len(x[1]))
-                except ValueError:
-                    largest_contour_index, largest_contour = 0, [[]]
-
-                if contour_count > 0:
-                    hull = cv2.convexHull(largest_contour)
-                    count, _, _ = hull.shape
-                    hull.ravel()
-                    hull.shape = count, 2
-                    cv2.polylines(frame, np.int32([hull]), True, (0, 255, 0), 3)
-
-                    area = cv2.contourArea(largest_contour)
-                    cv2.putText(frame, "largest contour area " + str(area) + "px",
-                                (0, frame_height / 6), self.font, 0.5, (50, 50, 255), 2)
-
-                    hull_area = cv2.contourArea(hull)
-                    cv2.putText(frame, "hull area " + str(hull_area) + "px",
-                                (0, frame_height / 7), self.font, 0.5, (50, 50, 255), 2)
-
-                cv2.drawContours(frame, contours, largest_contour_index, (255, 255, 0), 3)
-                cv2.imshow('thresh', thresh)
+                cv2.imshow('thresh', bg_thresh)
 
             # If skin color is sampled, we can isolate the sampled colors in the image
             if self.cs is not None:
                 thresh = self.cs.get_color_mask(frame_hsv)
-                _, contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                cv2.imshow('color_thresh', thresh)
 
+            if self.bg_sub.background_set and self.cs is not None:
+                combined = cv2.add(bg_thresh, thresh)
+
+                _, contours, _ = cv2.findContours(combined.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 contour_count = len(contours)
-                print(contour_count)
 
                 # find largest contour
                 try:
@@ -83,9 +66,9 @@ class Lympht:
 
                 if contour_count > 0:
                     hull = cv2.convexHull(largest_contour)
-                    count, _, _ = hull.shape
+                    # count, _, _ = hull.shape
                     hull.ravel()
-                    hull.shape = count, 2
+                    # hull.shape = count, 2
                     cv2.polylines(frame, np.int32([hull]), True, (0, 255, 0), 3)
 
                     area = cv2.contourArea(largest_contour)
@@ -98,20 +81,13 @@ class Lympht:
 
                     rows, cols = thresh.shape[:2]
                     [vx, vy, x, y] = cv2.fitLine(largest_contour, cv2.DIST_L2, 0, 0.01, 0.01)
-
                     lefty = int((-x * vy / vx) + y)
-
                     righty = int(((cols - x) * vy / vx) + y)
-
                     cv2.line(frame, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
+                cv2.drawContours(draw_frame, contours, largest_contour_index, (255, 255, 0), 3)
 
-                cv2.drawContours(frame, contours, largest_contour_index, (255, 255, 0), 3)
-                cv2.imshow('thresh', thresh)
+                cv2.imshow('combined', combined)
 
-                #cv2.imshow('color_thresh', color_thresh)
-
-
-            draw_frame = frame
             self.csl.draw_sample_locations(draw_frame)
             cv2.imshow(self.main_window_name, draw_frame)
 
