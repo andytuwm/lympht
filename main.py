@@ -42,7 +42,6 @@ class Lympht:
                 thresh, contours = self.bg_sub.get_diff(frame)
 
                 contour_count = len(contours)
-                print(contour_count)
 
                 # find largest contour
                 try:
@@ -70,10 +69,47 @@ class Lympht:
 
             # If skin color is sampled, we can isolate the sampled colors in the image
             if self.cs is not None:
-                # print(self.cs.color_sample_averages)
-                color_thresh = self.cs.get_color_mask(frame_hsv)
-                # self.cs.draw_sample_locations(frame)
-                cv2.imshow('color_thresh', color_thresh)
+                thresh = self.cs.get_color_mask(frame_hsv)
+                _, contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                contour_count = len(contours)
+                print(contour_count)
+
+                # find largest contour
+                try:
+                    largest_contour_index, largest_contour = max(enumerate(contours), key=lambda x: len(x[1]))
+                except ValueError:
+                    largest_contour_index, largest_contour = 0, [[]]
+
+                if contour_count > 0:
+                    hull = cv2.convexHull(largest_contour)
+                    count, _, _ = hull.shape
+                    hull.ravel()
+                    hull.shape = count, 2
+                    cv2.polylines(frame, np.int32([hull]), True, (0, 255, 0), 3)
+
+                    area = cv2.contourArea(largest_contour)
+                    cv2.putText(frame, "largest contour area " + str(area) + "px",
+                                (0, frame_height / 6), self.font, 0.5, (50, 50, 255), 2)
+
+                    hull_area = cv2.contourArea(hull)
+                    cv2.putText(frame, "hull area " + str(hull_area) + "px",
+                                (0, frame_height / 7), self.font, 0.5, (50, 50, 255), 2)
+
+                    rows, cols = thresh.shape[:2]
+                    [vx, vy, x, y] = cv2.fitLine(largest_contour, cv2.DIST_L2, 0, 0.01, 0.01)
+
+                    lefty = int((-x * vy / vx) + y)
+
+                    righty = int(((cols - x) * vy / vx) + y)
+
+                    cv2.line(frame, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
+
+                cv2.drawContours(frame, contours, largest_contour_index, (255, 255, 0), 3)
+                cv2.imshow('thresh', thresh)
+
+                #cv2.imshow('color_thresh', color_thresh)
+
 
             draw_frame = frame
             self.csl.draw_sample_locations(draw_frame)
