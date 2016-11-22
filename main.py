@@ -6,7 +6,6 @@ import numpy as np
 from src import backgnd_sub, colorSampleLocation
 from src.utils import image_utils
 from src import colorSampler as cs
-from math import degrees
 
 
 class Lympht:
