@@ -53,7 +53,10 @@ class Lympht:
                 cv2.imshow('color_thresh', thresh)
 
             if self.bg_sub.background_set and self.cs is not None:
-                combined = cv2.add(bg_thresh, thresh)
+                # combined = cv2.add(bg_thresh, thresh)
+                combined = cv2.bitwise_and(bg_thresh, thresh)
+                # frame.copyTo(frame,bg_thresh)
+                # frame.copyTo(frame,thresh)
 
                 _, contours, _ = cv2.findContours(combined.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 contour_count = len(contours)
@@ -66,24 +69,36 @@ class Lympht:
 
                 if contour_count > 0:
                     hull = cv2.convexHull(largest_contour)
+                    defect_hull = cv2.convexHull(largest_contour, returnPoints=False)
                     # count, _, _ = hull.shape
                     hull.ravel()
                     # hull.shape = count, 2
-                    cv2.polylines(frame, np.int32([hull]), True, (0, 255, 0), 3)
+                    try:
+                        cv2.polylines(draw_frame, np.int32([hull]), True, (0, 255, 0), 3)
+                        defects = cv2.convexityDefects(largest_contour, defect_hull)
+                        for defect in defects:
+                            print(defect)
+                            s, e, f, d = defect[0]
+                            far = tuple(largest_contour[f][0])
 
-                    area = cv2.contourArea(largest_contour)
-                    cv2.putText(frame, "largest contour area " + str(area) + "px",
-                                (0, frame_height / 6), self.font, 0.5, (50, 50, 255), 2)
+                            cv2.circle(draw_frame, far, 5, [0, 0, 255], -1)
 
-                    hull_area = cv2.contourArea(hull)
-                    cv2.putText(frame, "hull area " + str(hull_area) + "px",
-                                (0, frame_height / 7), self.font, 0.5, (50, 50, 255), 2)
+                    except:
+                        pass
 
-                    rows, cols = thresh.shape[:2]
-                    [vx, vy, x, y] = cv2.fitLine(largest_contour, cv2.DIST_L2, 0, 0.01, 0.01)
-                    lefty = int((-x * vy / vx) + y)
-                    righty = int(((cols - x) * vy / vx) + y)
-                    cv2.line(frame, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
+                    # area = cv2.contourArea(largest_contour)
+                    # cv2.putText(frame, "largest contour area " + str(area) + "px",
+                    #             (0, frame_height / 6), self.font, 0.5, (50, 50, 255), 2)
+                    #
+                    # hull_area = cv2.contourArea(hull)
+                    # cv2.putText(frame, "hull area " + str(hull_area) + "px",
+                    #             (0, frame_height / 7), self.font, 0.5, (50, 50, 255), 2)
+
+                    # rows, cols = thresh.shape[:2]
+                    # [vx, vy, x, y] = cv2.fitLine(largest_contour, cv2.DIST_L2, 0, 0.01, 0.01)
+                    # lefty = int((-x * vy / vx) + y)
+                    # righty = int(((cols - x) * vy / vx) + y)
+                    # cv2.line(frame, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
                 cv2.drawContours(draw_frame, contours, largest_contour_index, (255, 255, 0), 3)
 
                 cv2.imshow('combined', combined)

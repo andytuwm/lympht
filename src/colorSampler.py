@@ -41,10 +41,11 @@ class ColorSampler:
 
     # TODO Additional filtering
     def _filter_processing(self, frame):
-        frame = cv2.GaussianBlur(frame, (15, 15), 0)
+        frame = cv2.GaussianBlur(frame, (21, 21), 0)
+        frame = cv2.bilateralFilter(frame, 9, 75, 75)
         kernel = np.ones((10, 10), np.uint8)
-        #frame = cv2.morphologyEx(frame, cv2.MORPH_CLOSE, kernel)
-        #frame = cv2.morphologyEx(frame, cv2.MORPH_OPEN, kernel)
+        # frame = cv2.morphologyEx(frame, cv2.MORPH_CLOSE, kernel)
+        # frame = cv2.morphologyEx(frame, cv2.MORPH_OPEN, kernel)
         frame = cv2.erode(frame, kernel)
         frame = cv2.dilate(frame, kernel)
         return frame

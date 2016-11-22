@@ -3,7 +3,7 @@ import cv2
 
 class ColorSampleLocation:
     def __init__(self, frame):
-        self.sample_rows = 10
+        self.sample_rows = 8
         self.sample_columns = 1
         self.frame_h, self.frame_w = frame.shape[:2]
         self.color_sample_locations = []
