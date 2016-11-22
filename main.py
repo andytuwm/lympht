@@ -83,7 +83,8 @@ class Lympht:
                     [vx, vy, x, y] = cv2.fitLine(largest_contour, cv2.DIST_L2, 0, 0.01, 0.01)
                     lefty = int((-x * vy / vx) + y)
                     righty = int(((cols - x) * vy / vx) + y)
-                    cv2.line(frame, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
+                    cv2.line(draw_frame, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
+
                 cv2.drawContours(draw_frame, contours, largest_contour_index, (255, 255, 0), 3)
 
                 cv2.imshow('combined', combined)
@@ -93,6 +94,23 @@ class Lympht:
 
         cv2.destroyAllWindows()
 
+        #return the angle of the two lines given by x1, y1, x2, y2 in degrees
+        def findAngle(self, x1, y1, x2, y2):
+            len1 = np.sqrt(x1 * x1 + y1 * y1) 
+            len2 = np.sqrt(x2 * x2 + y2 * y2)
+            dot = x1 * x2 + y1 * y2 
+            cosTheta = dot / (len1 * len2)
+            radians = 0.0
+            
+            if (cosTheta >= 1.0):
+                radians = 0.0
+            elif (cosTheta <= -1.0):
+                radians = np.pi
+            else:
+                radians = np.arccos(cosTheta)
+                
+            return np.degrees(radians) 
+        
 
 if __name__ == "__main__":
     lympht = Lympht()
