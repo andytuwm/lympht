@@ -6,6 +6,7 @@ import numpy as np
 from src import backgnd_sub, colorSampleLocation
 from src.utils import image_utils
 from src import colorSampler as cs
+from math import degrees
 
 
 class Lympht:
@@ -83,7 +84,11 @@ class Lympht:
                     [vx, vy, x, y] = cv2.fitLine(largest_contour, cv2.DIST_L2, 0, 0.01, 0.01)
                     lefty = int((-x * vy / vx) + y)
                     righty = int(((cols - x) * vy / vx) + y)
+                    
+                    verticalLine = [(cols / 2, 0),(cols / 2, rows - 1)]
+
                     cv2.line(draw_frame, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
+                    cv2.line(draw_frame, verticalLine[0], verticalLine[1], (0, 255, 0), 2)
 
                 cv2.drawContours(draw_frame, contours, largest_contour_index, (255, 255, 0), 3)
 
@@ -94,23 +99,28 @@ class Lympht:
 
         cv2.destroyAllWindows()
 
-        #return the angle of the two lines given by x1, y1, x2, y2 in degrees
-        def findAngle(self, x1, y1, x2, y2):
-            len1 = np.sqrt(x1 * x1 + y1 * y1) 
-            len2 = np.sqrt(x2 * x2 + y2 * y2)
-            dot = x1 * x2 + y1 * y2 
-            cosTheta = dot / (len1 * len2)
-            radians = 0.0
+        # return the angle of two lines where x1, y1, x2, y2 are points on different
+        # lines and x3, y3 is the intersection of the two lines
+        def findAngle(self, (x1, y1), (x2, y2), (x3, y3)):
+            len1X = x1 - x3
+            len1Y = y1 - y3
+            len2X = x2 - x3
+            len2Y = y2 - y3
             
-            if (cosTheta >= 1.0):
-                radians = 0.0
-            elif (cosTheta <= -1.0):
-                radians = np.pi
-            else:
-                radians = np.arccos(cosTheta)
-                
-            return np.degrees(radians) 
-        
+            dot = x1 * x2 + y1 * y2 
+            
+            magnitude1 = np.sqrt(len1X * len1X + len1Y * len1Y)
+            magnitude2 = np.sqrt(len2X * len2X + len2Y * len2Y)
+            
+            cosTheta = dot / (magnitude1 * magnitude2)
+            
+            radians = np.arccos(cosTheta)
+            degrees = np.rad2deg(radians)
+            
+            if(degrees > 180):
+                degrees = 360 - degrees
+            
+            return degrees
 
 if __name__ == "__main__":
     lympht = Lympht()
