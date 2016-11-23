@@ -52,7 +52,7 @@ class Lympht:
 
             # If skin color is sampled, we can isolate the sampled colors in the image
             if self.cs is not None:
-                thresh = self.cs.get_color_mask(frameHsv)
+                thresh = self.cs.getColorMask(frameHsv)
                 cv2.imshow('color_thresh', thresh)
 
             if self.bgSub.backgroundSet and self.cs is not None:
