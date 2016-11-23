@@ -3,10 +3,11 @@ from __future__ import print_function
 import cv2
 import numpy as np
 
-from src import backgnd_sub, colorSampleLocation
-from src.utils import image_utils
-from src import colorSampler as cs
-
+import backgnd_sub
+import colorSampleLocation
+import colorSampler as cs
+import angleDerivation as ad
+from utils import image_utils
 
 class Lympht:
     def __init__(self):
@@ -72,18 +73,30 @@ class Lympht:
                     cv2.polylines(frame, np.int32([hull]), True, (0, 255, 0), 3)
 
                     area = cv2.contourArea(largest_contour)
-                    cv2.putText(frame, "largest contour area " + str(area) + "px",
+                    cv2.putText(draw_frame, "largest contour area " + str(area) + "px",
                                 (0, frame_height / 6), self.font, 0.5, (50, 50, 255), 2)
 
                     hull_area = cv2.contourArea(hull)
-                    cv2.putText(frame, "hull area " + str(hull_area) + "px",
+                    cv2.putText(draw_frame, "hull area " + str(hull_area) + "px",
                                 (0, frame_height / 7), self.font, 0.5, (50, 50, 255), 2)
 
                     rows, cols = thresh.shape[:2]
                     [vx, vy, x, y] = cv2.fitLine(largest_contour, cv2.DIST_L2, 0, 0.01, 0.01)
                     lefty = int((-x * vy / vx) + y)
                     righty = int(((cols - x) * vy / vx) + y)
-                    cv2.line(frame, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
+                    
+                    verticalLine = [(cols / 2, 0), (cols / 2, rows - 1)]
+                    contourLine = [(cols - 1, righty), (0, lefty)]
+
+                    verticalVector = (0, 1)
+                    contourVector = (vx, vy)
+                    angle = ad.AngleDerivation.findAngle(verticalVector, contourVector)
+                    
+                    cv2.line(draw_frame, contourLine[0], contourLine[1], (0, 255, 0), 2)
+                    cv2.line(draw_frame, verticalLine[0], verticalLine[1], (0, 255, 0), 2)
+                    cv2.putText(draw_frame, "angle " + str(angle) + " degrees",
+                                (0, frame_height / 5), self.font, 0.5, (50, 50, 255), 2)
+
                 cv2.drawContours(draw_frame, contours, largest_contour_index, (255, 255, 0), 3)
 
                 cv2.imshow('combined', combined)
@@ -92,7 +105,6 @@ class Lympht:
             cv2.imshow(self.main_window_name, draw_frame)
 
         cv2.destroyAllWindows()
-
 
 if __name__ == "__main__":
     lympht = Lympht()
