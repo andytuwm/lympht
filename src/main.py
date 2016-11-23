@@ -17,7 +17,7 @@ class Lympht:
         self.bgSub = bgs.BackgroundSubtractor()
         self.cs = None
         self.csl = csl.ColorSampleLocation(self.capture.read()[1])
-        self.cs_locations = self.csl.get_color_sample_locations()
+        self.cs_locations = self.csl.getColorSampleLocations()
 
     def run(self):
         while True:
@@ -102,7 +102,7 @@ class Lympht:
 
                 cv2.imshow('combined', combined)
 
-            self.csl.draw_sample_locations(drawFrame)
+            self.csl.drawSampleLocations(drawFrame)
             cv2.imshow(self.mainWindowName, drawFrame)
 
         cv2.destroyAllWindows()
