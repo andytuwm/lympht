@@ -3,10 +3,11 @@ from __future__ import print_function
 import cv2
 import numpy as np
 
-from src import backgnd_sub, colorSampleLocation
-from src.utils import image_utils
-from src import colorSampler as cs
-
+import backgnd_sub
+import colorSampleLocation
+import colorSampler as cs
+import angleDerivation as ad
+from utils import image_utils
 
 class Lympht:
     def __init__(self):
@@ -89,7 +90,7 @@ class Lympht:
 
                     verticalVector = (0, 1)
                     contourVector = (vx, vy)
-                    angle = self.findAngle(verticalVector, contourVector)
+                    angle = ad.AngleDerivation.findAngle(verticalVector, contourVector)
                     
                     cv2.line(draw_frame, contourLine[0], contourLine[1], (0, 255, 0), 2)
                     cv2.line(draw_frame, verticalLine[0], verticalLine[1], (0, 255, 0), 2)
@@ -104,28 +105,6 @@ class Lympht:
             cv2.imshow(self.main_window_name, draw_frame)
 
         cv2.destroyAllWindows()
-
-    # return the angle between two vectors
-    def findAngle(self, vector1, vector2):
-        x1, y1 = vector1
-        x2, y2 = vector2
-        
-        dot = x1 * x2 + y1 * y2
-        
-        magnitude1 = np.sqrt(x1 * x1 + y1 * y1)
-        magnitude2 = np.sqrt(x2 * x2 + y2 * y2)
-
-        cosTheta = dot / (magnitude1 * magnitude2)
-        radians = 0
-        
-        if(cosTheta >= 1):
-            radians = 0
-        elif(cosTheta <= -1):
-            radians = np.pi
-        else:
-            radians = np.arccos(cosTheta)
-            
-        return np.degrees(radians)
 
 if __name__ == "__main__":
     lympht = Lympht()
