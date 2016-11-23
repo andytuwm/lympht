@@ -34,7 +34,7 @@ class Lympht:
                 break
             # On 'b' keypress, we save the background
             elif c == ord('b'):
-                self.bgSub.set_frame_as_background(bg)
+                self.bgSub.setFrameAsBackground(bg)
             # On 'c' keypress, we sample the colors
             elif c == ord('c'):
                 self.cs = cs.ColorSampler(frameHsv, self.cs_locations)
@@ -45,7 +45,7 @@ class Lympht:
 
             # If background is set, we can differentiate
             # foreground and background
-            if self.bgSub.background_set is True:
+            if self.bgSub.backgroundSet is True:
                 bgThresh, contours = self.bgSub.get_diff(bg)
                 contourCount = len(contours)
                 cv2.imshow('thresh', bgThresh)
@@ -55,7 +55,7 @@ class Lympht:
                 thresh = self.cs.get_color_mask(frameHsv)
                 cv2.imshow('color_thresh', thresh)
 
-            if self.bgSub.background_set and self.cs is not None:
+            if self.bgSub.backgroundSet and self.cs is not None:
                 combined = cv2.add(bgThresh, thresh)
 
                 _, contours, _ = cv2.findContours(combined.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)

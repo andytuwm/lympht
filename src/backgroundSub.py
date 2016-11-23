@@ -3,12 +3,12 @@ import cv2
 
 class BackgroundSubtractor:
     def __init__(self):
-        self.background_set = False
+        self.backgroundSet = False
         self.bg = None
 
-    def set_frame_as_background(self, frame):
+    def setFrameAsBackground(self, frame):
         self.bg = frame
-        self.background_set = True
+        self.backgroundSet = True
 
     def get_diff(self, frame):
         diff = cv2.absdiff(self.bg, frame)
