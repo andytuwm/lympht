@@ -56,7 +56,7 @@ class Lympht:
                 cv2.imshow('color_thresh', thresh)
 
             if self.bgSub.backgroundSet and self.cs is not None:
-                combined = cv2.add(bgThresh, thresh)
+                combined = cv2.bitwise_and(bgThresh, thresh)
 
                 _, contours, _ = cv2.findContours(combined.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 contourCount = len(contours)
