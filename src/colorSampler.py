@@ -22,8 +22,8 @@ class ColorSampler:
         # add a lower and upper bound for each averaged color sample
         for color_sample in self.color_sample_averages:
             # TODO H has a range from 0 to 180 so adjust max value
-            upperbound = tuple(map(lambda n: min(n, 255), [x + 10 for x in color_sample]))
-            lowerbound = tuple(map(lambda n: max(n, 0), [x - 10 for x in color_sample]))
+            upperbound = tuple(map(lambda n: min(n, 255), [x + 20 for x in color_sample]))
+            lowerbound = tuple(map(lambda n: max(n, 0), [x - 20 for x in color_sample]))
             self.bounds_list.append([lowerbound, upperbound])
 
     # Output a mask that is a sum of the average colors sampled from the current frame
